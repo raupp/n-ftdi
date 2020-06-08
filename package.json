@@ -1,6 +1,6 @@
 {
-  "name": "n-ftdi",
-  "version": "0.1.2",
+  "name": "n-ftdie",
+  "version": "0.1.3",
   "description": "FTDI bindings for N-API Node.js, with the same interface as the managed .NET wrapper.",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -8,14 +8,22 @@
     "test-no-devices": "mocha tests/no-devices.test.js",
     "test-one-device": "mocha --expose_gc tests/one-device.test.js",
     "install": "node-gyp rebuild",
+    "installnw": "nw-gyp rebuild",
     "eslint": "eslint index.js ./tests/*.js",
     "eslint-fix": "eslint index.js ./tests/*.js --fix"
   },
   "keywords": [
     "ftdi",
     "usb",
-    "device"
+    "device",
+    "chipId"
   ],
+  "binary": {
+    "module_name": "n-ftdi",
+    "module_path": "./build/{module_name}/v{version}/{configuration}/{node_abi}-{platform}-{arch}/",
+    "remote_path": "./{module_name}/v{version}/{configuration}/",
+    "package_name": "{node_abi}-{platform}-{arch}.tar.gz"
+  },
   "dependencies": {
     "bindings": "^1.5.0",
     "node-addon-api": "^1.7.1"
@@ -36,6 +44,7 @@
     "eslint-plugin-node": "^9.2.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
-    "mocha": "^6.2.3"
+    "mocha": "^6.2.3",
+    "nw-gyp": "^3.6.5"
   }
 }

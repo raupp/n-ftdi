@@ -1,9 +1,14 @@
 #ifndef FT_GET_DEVICE_INFO_DETAIL_OP_H_
 #define FT_GET_DEVICE_INFO_DETAIL_OP_H_
 
+#ifndef FTDI_DRIVER_H
+#define FTDI_DRIVER_H
+
 #include <napi.h>
 #include <ftd2xx.h>
+#include "FTChipID.h"
 #include "ft_base_op.h"
+
 
 class FtGetDeviceInfoDetailOp : public FtBaseOp
 {
@@ -23,6 +28,8 @@ private:
     DWORD locId;
     char serialNumber[16];
     char description[64];
+    unsigned long chipId;
+    long comPortNumber;
     FT_HANDLE ftHandle;
     inline static Napi::Object CreateResult(
         Napi::Env env,
@@ -33,7 +40,11 @@ private:
         DWORD locId,
         char *serialNumber,
         char *description,
-        FT_HANDLE ftHandle);
+        unsigned long chipId,
+        long comPortNumber,
+        FT_HANDLE ftHandle
+        );
 };
 
 #endif // FT_GET_DEVICE_INFO_DETAIL_OP_H_
+#endif

@@ -16,9 +16,20 @@ Napi::Object FtGetDeviceInfoDetailOp::InvokeSync(const Napi::CallbackInfo &info)
     DWORD locId;
     char serialNumber[16];
     char description[64];
+    unsigned long chipId;
+    long comPortNumber;
     FT_HANDLE ftHandle;
     FT_STATUS ftStatus = FT_GetDeviceInfoDetail(index, &flags, &type, &id, &locId, serialNumber, description, &ftHandle);
-    return CreateResult(info.Env(), ftStatus, flags, id, type, locId, serialNumber, description, ftHandle);
+    
+    FTID_GetDeviceChipID(index, &chipId);
+
+    if (FT_Open(index, &ftHandle) == FT_OK) {
+        FT_GetComPortNumber(ftHandle, &comPortNumber);
+        FT_Close(ftHandle);
+    }
+    
+
+    return CreateResult(info.Env(), ftStatus, flags, id, type, locId, serialNumber, description, chipId, comPortNumber, ftHandle);
 }
 
 Napi::Promise FtGetDeviceInfoDetailOp::Invoke(const Napi::CallbackInfo &info)
@@ -34,12 +45,18 @@ FtGetDeviceInfoDetailOp::FtGetDeviceInfoDetailOp(Napi::Env env, DWORD index) : F
 void FtGetDeviceInfoDetailOp::Execute()
 {
     ftStatus = FT_GetDeviceInfoDetail(index, &flags, &type, &id, &locId, serialNumber, description, &ftHandle);
+    FTID_GetDeviceChipID(index, &chipId);
+
+    if (FT_Open(index, &ftHandle) == FT_OK) {
+        FT_GetComPortNumber(ftHandle, &comPortNumber);
+        FT_Close(ftHandle);
+    }
 }
 
 void FtGetDeviceInfoDetailOp::OnOK()
 {
     Napi::HandleScope scope(Env());
-    deferred.Resolve(CreateResult(Env(), ftStatus, flags, id, type, locId, serialNumber, description, ftHandle));
+    deferred.Resolve(CreateResult(Env(), ftStatus, flags, id, type, locId, serialNumber, description, chipId, comPortNumber, ftHandle));
 }
 
 Napi::Object FtGetDeviceInfoDetailOp::CreateResult(
@@ -51,6 +68,8 @@ Napi::Object FtGetDeviceInfoDetailOp::CreateResult(
     DWORD locId,
     char *serialNumber,
     char *description,
+    DWORD chipId, 
+    long comPortNumber,
     FT_HANDLE ftHandle)
 {
     Napi::Object result = Napi::Object::New(env);
@@ -62,6 +81,8 @@ Napi::Object FtGetDeviceInfoDetailOp::CreateResult(
     deviceInfoNode.Set("locId", locId);
     deviceInfoNode.Set("serialNumber", serialNumber);
     deviceInfoNode.Set("description", description);
+    deviceInfoNode.Set("COM", comPortNumber);
+    deviceInfoNode.Set("chipID", chipId);
     if (ftHandle != nullptr)
     {
         deviceInfoNode.Set("ftHandle", Napi::External<void>::New(env, ftHandle));

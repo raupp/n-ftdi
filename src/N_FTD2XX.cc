@@ -21,6 +21,7 @@
 #include "ft_read_op.h"
 #include "ft_set_bit_mode_op.h"
 
+
 Napi::Object Init(Napi::Env env, Napi::Object exports)
 {
     FtProgramDataWrapper::Init(env, exports);
